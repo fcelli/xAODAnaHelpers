@@ -89,6 +89,11 @@ FatJetContainer::FatJetContainer(const std::string& name, const std::string& det
     m_muonCorrected_m   = new std::vector<float>();
   }
 
+  // flavorTag
+  if ( m_infoSwitch.m_flavorTag ) {
+    m_HadronConeExclExtendedTruthLabelID = new std::vector<int>();
+  }
+
   for(const auto& trackJetName : m_infoSwitch.m_trackJetNames)
     {
       std::string trkJetName = name;
@@ -181,6 +186,11 @@ FatJetContainer::~FatJetContainer()
     delete m_muonCorrected_eta;
     delete m_muonCorrected_phi;
     delete m_muonCorrected_m;
+  }
+
+  // flavorTag
+  if ( m_infoSwitch.m_flavorTag ) {
+    delete m_HadronConeExclExtendedTruthLabelID;
   }
 
   if( !m_infoSwitch.m_trackJetNames.empty() ){
@@ -281,6 +291,11 @@ void FatJetContainer::setTree(TTree *tree)
 	
   } 
 
+  // flavorTag
+  if ( m_infoSwitch.m_flavorTag ) {
+    connectBranch< int >(tree, "HadronConeExclExtendedTruthLabelID", &m_HadronConeExclExtendedTruthLabelID);
+  }
+
   for(const std::pair< std::string, std::vector<std::vector<unsigned int>>* >& kv : m_trkJetsIdx)
     {
       m_trkJets[kv.first]->JetContainer::setTree(tree);
@@ -372,6 +387,11 @@ void FatJetContainer::updateParticle(uint idx, FatJet& fatjet)
     fatjet.muonCorrected_eta = m_muonCorrected_eta->at(idx);
     fatjet.muonCorrected_phi = m_muonCorrected_phi->at(idx);
     fatjet.muonCorrected_m   = m_muonCorrected_m  ->at(idx);
+  }
+
+  // flavorTag
+  if ( m_infoSwitch.m_flavorTag ){
+    if(m_HadronConeExclExtendedTruthLabelID) fatjet.HadronConeExclExtendedTruthLabelID = m_HadronConeExclExtendedTruthLabelID -> at(idx);
   }
 
   for(const auto& kv : m_trkJets)
@@ -473,6 +493,11 @@ void FatJetContainer::setBranches(TTree *tree)
     setBranch<float> (tree, "muonCorrected_m"  , m_muonCorrected_m  );
   }
 
+  // flavorTag
+  if ( m_infoSwitch.m_flavorTag ) {
+    setBranch< int > (tree, "HadronConeExclExtendedTruthLabelID", m_HadronConeExclExtendedTruthLabelID);
+  }
+
   for(const auto& kv : m_trkJets)
     {
       kv.second->setBranches(tree);
@@ -564,7 +589,12 @@ void FatJetContainer::clear()
     m_muonCorrected_phi->clear();
     m_muonCorrected_m  ->clear();
   }
-  
+
+  // flavorTag
+  if ( m_infoSwitch.m_flavorTag ) {
+    m_HadronConeExclExtendedTruthLabelID->clear();
+  }
+
   for(const std::pair< std::string, std::vector<std::vector<unsigned int>>* >& kv : m_trkJetsIdx)
     {
       m_trkJets   [kv.first]->clear();
@@ -803,6 +833,11 @@ void FatJetContainer::FillFatJet( const xAOD::IParticle* particle, int pvLocatio
       m_muonCorrected_m  ->push_back(acc_correctedFatJets_tlv(*fatjet).M()  / m_units);
   }
 
+  // flavorTag
+  if ( m_infoSwitch.m_flavorTag ) {
+    static SG::AuxElement::ConstAccessor<int> hadConeExclExtendedTruthLabel("HadronConeExclExtendedTruthLabelID");
+    safeFill<int, int, xAOD::Jet>(fatjet, hadConeExclExtendedTruthLabel, m_HadronConeExclExtendedTruthLabelID, -999);
+  }
 
   //
   // Associated track jets

@@ -125,6 +125,9 @@ namespace xAH {
       std::vector<float> *m_muonCorrected_phi;
       std::vector<float> *m_muonCorrected_m;
 
+      // flavorTag
+      std::vector<int> *m_HadronConeExclExtendedTruthLabelID;
+
     };
 }
 

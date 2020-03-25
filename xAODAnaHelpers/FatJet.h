@@ -84,6 +84,9 @@ namespace xAH {
       float muonCorrected_eta;
       float muonCorrected_phi;
       float muonCorrected_m;
+
+      // flavorTag
+      int HadronConeExclExtendedTruthLabelID;
     };
 
 }//xAH
